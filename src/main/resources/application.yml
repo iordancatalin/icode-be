@@ -5,3 +5,8 @@ spring:
 
 file:
     name: index.html
+
+execution:
+    result:
+        endpoint:
+            http://localhost:8080/api/execution-result/
