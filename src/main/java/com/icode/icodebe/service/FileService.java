@@ -30,13 +30,25 @@ public class FileService {
         return Mono.fromCompletionStage(() -> writeToDisk(content));
     }
 
+    public Mono<Path> getPathToFile(String directoryName) {
+        return Mono.fromSupplier(() -> {
+            final var path = Paths.get(Constants.STORAGE_ROOT_DIRECTORY, directoryName, fileName);
+
+            if (!Files.exists(path)) {
+                throw new RuntimeException("Invalid directory name");
+            }
+
+            return path;
+        });
+    }
+
     private CompletableFuture<Path> writeToDisk(String content) {
         final var directoryName = generateDirectoryName();
         final var path = Paths.get(Constants.STORAGE_ROOT_DIRECTORY, directoryName, fileName);
 
         createDirectoriesIfDoesNotExists(path.getParent());
 
-        return  writeContentToPath(path, content);
+        return writeContentToPath(path, content);
     }
 
     private CompletableFuture<Path> writeContentToPath(Path path, String content) {

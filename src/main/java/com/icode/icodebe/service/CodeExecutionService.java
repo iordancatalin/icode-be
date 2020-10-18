@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 import static com.icode.icodebe.common.Constants.FILE_TEMPLATE;
@@ -35,6 +38,20 @@ public class CodeExecutionService {
                 .map(Path::getFileName)
                 .map(Path::toString)
                 .map(this::createLink);
+    }
+
+    public Mono<InputStream> getExecutionResult(String directoryName) {
+        return fileService.getPathToFile(directoryName)
+                .map(Path::toFile)
+                .map(file -> {
+                    try {
+                        return new FileInputStream(file);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                    return null;
+                });
     }
 
     private ExecutionResult createLink(String directoryName) {
