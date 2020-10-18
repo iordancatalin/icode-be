@@ -17,6 +17,9 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.*
 @Configuration
 public class CodeExecutionRouterConfig {
 
+    private static final String X_FRAME_OPTIONS_HEADER = "X-Frame-Options";
+    private static final String X_FRAME_ALLOWALL = "ALLOWALL";
+
     private final CodeExecutionService codeExecutionService;
 
     public CodeExecutionRouterConfig(CodeExecutionService codeExecutionService) {
@@ -25,8 +28,8 @@ public class CodeExecutionRouterConfig {
 
     @Bean
     public RouterFunction<ServerResponse> executionRouter() {
-        return route(POST("/api/execute-code"), this::handleExecute)
-                .andRoute(GET("/api/execution-result/{directoryName}"), this::handleGetExecutionResult);
+        return route(POST("/api/v1/execute-code"), this::handleExecute)
+                .andRoute(GET("/api/v1/execution-result/{directoryName}"), this::handleGetExecutionResult);
     }
 
     private Mono<ServerResponse> handleExecute(ServerRequest serverRequest) {
@@ -43,7 +46,8 @@ public class CodeExecutionRouterConfig {
                 .map(InputStreamResource::new);
 
         return ServerResponse.ok().contentType(MediaType.TEXT_HTML)
+                // Needed for iframe to work
+                .header(X_FRAME_OPTIONS_HEADER, X_FRAME_ALLOWALL)
                 .body(responsePub, Resource.class);
     }
-
 }
