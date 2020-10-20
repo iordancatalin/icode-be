@@ -19,6 +19,7 @@ public class CodeExecutionRouterConfig {
 
     private static final String X_FRAME_OPTIONS_HEADER = "X-Frame-Options";
     private static final String X_FRAME_ALLOWALL = "ALLOWALL";
+    private static final String X_WRK_DIRECTORY = "X-WRK-DIRECTORY";
 
     private final CodeExecutionService codeExecutionService;
 
@@ -33,9 +34,11 @@ public class CodeExecutionRouterConfig {
     }
 
     private Mono<ServerResponse> handleExecute(ServerRequest serverRequest) {
+        final var directory = serverRequest.headers().firstHeader(X_WRK_DIRECTORY);
+
         final var responsePub = serverRequest.bodyToMono(ExecutionRequest.class)
                 .map(codeExecutionService::createHTMLContent)
-                .flatMap(codeExecutionService::writeContent);
+                .flatMap(content -> codeExecutionService.writeContent(content, directory));
 
         return ServerResponse.ok().body(responsePub, ExecutionResult.class);
     }

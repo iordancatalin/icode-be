@@ -26,8 +26,24 @@ public class FileService {
     @Value("${file.name}")
     private String fileName;
 
+    public Mono<Path> saveContentToDisk(String content, String directory) {
+        return Mono.fromCompletionStage(() -> writeToDisk(content, directory));
+    }
+
     public Mono<Path> saveContentToDisk(String content) {
         return Mono.fromCompletionStage(() -> writeToDisk(content));
+    }
+
+    private CompletableFuture<Path> writeToDisk(String content) {
+        final var directoryName = generateDirectoryName();
+        return writeToDisk(content, directoryName);
+    }
+
+    private CompletableFuture<Path> writeToDisk(String content, String directoryName) {
+        final var path = Paths.get(Constants.STORAGE_ROOT_DIRECTORY, directoryName, fileName);
+        createDirectoriesIfDoesNotExists(path.getParent());
+
+        return writeContentToPath(path, content);
     }
 
     public Mono<Path> getPathToFile(String directoryName) {
@@ -42,19 +58,10 @@ public class FileService {
         });
     }
 
-    private CompletableFuture<Path> writeToDisk(String content) {
-        final var directoryName = generateDirectoryName();
-        final var path = Paths.get(Constants.STORAGE_ROOT_DIRECTORY, directoryName, fileName);
-
-        createDirectoriesIfDoesNotExists(path.getParent());
-
-        return writeContentToPath(path, content);
-    }
-
     private CompletableFuture<Path> writeContentToPath(Path path, String content) {
         final var completableFuture = new CompletableFuture<Path>();
 
-        try (final var channel = AsynchronousFileChannel.open(path, WRITE, CREATE_NEW)) {
+        try (final var channel = AsynchronousFileChannel.open(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
             final var contentBytes = content.getBytes();
             final var byteBuffer = ByteBuffer.allocate(contentBytes.length);
             byteBuffer.put(contentBytes);

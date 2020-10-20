@@ -9,5 +9,4 @@ public class IcodeBeApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(IcodeBeApplication.class, args);
 	}
-
 }
