@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -24,11 +26,6 @@ import reactor.core.publisher.Mono;
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
 
-    private static final String ALLOWED_HEADERS = "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN, X-WRK-DIRECTORY";
-    private static final String ALLOWED_METHODS = "GET, PUT, POST, DELETE, OPTIONS";
-    private static final String ALLOWED_ORIGIN = "*";
-    private static final String MAX_AGE = "3600";
-
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         final var publicPaths = new String[]{"/api/v1/execute-code", "/api/v1/execution-result/*"};
@@ -36,11 +33,9 @@ public class SecurityConfiguration {
         return http
                 .csrf()
                 .disable()
-                .cors()
-                .and()
+                .cors(new CorsCustomizer())
                 .formLogin().disable()
                 .httpBasic().disable()
-                .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
                 .authorizeExchange()
                 .pathMatchers(publicPaths)
                 .permitAll()
@@ -48,25 +43,5 @@ public class SecurityConfiguration {
                 .authenticated()
                 .and()
                 .build();
-    }
-
-    @Bean
-    public WebFilter corsFilter() {
-        return (ServerWebExchange ctx, WebFilterChain chain) -> {
-            ServerHttpRequest request = ctx.getRequest();
-            if (CorsUtils.isCorsRequest(request)) {
-                ServerHttpResponse response = ctx.getResponse();
-                HttpHeaders headers = response.getHeaders();
-                headers.set("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
-                headers.set("Access-Control-Allow-Methods", ALLOWED_METHODS);
-                headers.set("Access-Control-Max-Age", MAX_AGE);
-                headers.set("Access-Control-Allow-Headers", ALLOWED_HEADERS);
-                if (request.getMethod() == HttpMethod.OPTIONS) {
-                    response.setStatusCode(HttpStatus.OK);
-                    return Mono.empty();
-                }
-            }
-            return chain.filter(ctx);
-        };
     }
 }

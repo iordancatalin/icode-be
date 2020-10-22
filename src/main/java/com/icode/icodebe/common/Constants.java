@@ -10,7 +10,7 @@ public class Constants {
             "    <style>%s</style>\n" +
             "  </head>\n" +
             "  <body>\n" +
-            "    %s<script>%s</script>\n" +
+            "    %s<div><script>%s</script></div>\n" +
             "  </body>\n" +
             "</html>\n";
 }
