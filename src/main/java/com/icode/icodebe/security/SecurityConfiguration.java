@@ -28,7 +28,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
-        final var publicPaths = new String[]{"/api/v1/execute-code", "/api/v1/execution-result/*"};
+        final var publicPaths = new String[]{"/api/v1/execute-code", "/api/v1/execution-result/*", "/api/v1/sign-up"};
 
         return http
                 .csrf()
@@ -41,5 +41,10 @@ public class SecurityConfiguration {
                 .authenticated()
                 .and()
                 .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
