@@ -34,8 +34,6 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .cors(new CorsCustomizer())
-                .formLogin().disable()
-                .httpBasic().disable()
                 .authorizeExchange()
                 .pathMatchers(publicPaths)
                 .permitAll()
