@@ -1,4 +1,4 @@
-package com.icode.icodebe.model;
+package com.icode.icodebe.model.request;
 
 import lombok.Data;
 

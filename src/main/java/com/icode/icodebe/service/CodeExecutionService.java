@@ -1,7 +1,7 @@
 package com.icode.icodebe.service;
 
-import com.icode.icodebe.model.ExecutionRequest;
-import com.icode.icodebe.model.ExecutionResult;
+import com.icode.icodebe.model.request.ExecutionRequest;
+import com.icode.icodebe.model.response.ExecutionResult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

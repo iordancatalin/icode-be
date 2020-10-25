@@ -1,7 +1,7 @@
 package com.icode.icodebe.router;
 
-import com.icode.icodebe.model.ExecutionRequest;
-import com.icode.icodebe.model.ExecutionResult;
+import com.icode.icodebe.model.request.ExecutionRequest;
+import com.icode.icodebe.model.response.ExecutionResult;
 import com.icode.icodebe.service.CodeExecutionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
