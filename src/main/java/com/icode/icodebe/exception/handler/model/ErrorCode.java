@@ -8,6 +8,7 @@ public enum ErrorCode {
     X_400("X-400"),
     X_401("X-401"),
     X_403("X-403"),
+    X_404("X-404"),
     X_500("X-500");
 
     @JsonValue
