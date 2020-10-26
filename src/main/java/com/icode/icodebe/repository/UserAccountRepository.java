@@ -18,8 +18,8 @@ public class UserAccountRepository {
     }
 
     public Mono<UserAccount> findByEmailOrUsername(String email, String username) {
-        final var criteria = Criteria.where("email").is(email)
-                .orOperator(Criteria.where("username").is(username));
+        final var criteria = new Criteria().orOperator(Criteria.where("email").is(email),
+                Criteria.where("username").is(username));
         final var query = Query.query(criteria);
 
         return reactiveMongoTemplate.findOne(query, UserAccount.class);
