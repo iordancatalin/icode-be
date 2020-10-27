@@ -1,7 +1,6 @@
 package com.icode.icodebe.exception.handler.impl;
 
 import com.icode.icodebe.exception.handler.model.ErrorModel;
-import com.icode.icodebe.exception.handler.model.factory.ErrorModelFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UnauthorizedExceptionsHandler extends AbstractExceptionHandler<Throwable> {
+
     @Override
     public boolean supports(Class<? extends Throwable> clazz) {
         return AuthenticationException.class.equals(clazz) ||
@@ -17,7 +17,7 @@ public class UnauthorizedExceptionsHandler extends AbstractExceptionHandler<Thro
 
     @Override
     public ErrorModel getErrorModel(Throwable throwable) {
-        return ErrorModelFactory.createUnauthorized(throwable);
+        return getErrorModelFactory().createUnauthorized(throwable);
     }
 
     @Override

@@ -13,14 +13,17 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@Configuration
-@Order(-2)
 @Log4j2
+@Order(-2)
+@Configuration
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
+    private final ErrorModelFactory errorModelFactory;
     private final List<ExceptionHandler> exceptionHandlers;
 
-    public GlobalExceptionHandler(List<ExceptionHandler> exceptionHandlers) {
+    public GlobalExceptionHandler(ErrorModelFactory errorModelFactory,
+                                  List<ExceptionHandler> exceptionHandlers) {
+        this.errorModelFactory = errorModelFactory;
         this.exceptionHandlers = exceptionHandlers;
     }
 
@@ -31,12 +34,18 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         final var exceptionHandler = exceptionHandlers.stream()
                 .filter(handler -> handler.supports(throwable.getClass()))
                 .findFirst()
-                .orElse(new InternalServerErrorHandler());
+                .orElse(new InternalServerErrorHandler(errorModelFactory));
 
         return exceptionHandler.handle(serverWebExchange, throwable);
     }
 
     private static class InternalServerErrorHandler extends AbstractExceptionHandler<Throwable> {
+
+        private final ErrorModelFactory errorModelFactory;
+
+        public InternalServerErrorHandler(ErrorModelFactory errorModelFactory) {
+            this.errorModelFactory = errorModelFactory;
+        }
 
         @Override
         public boolean supports(Class<? extends Throwable> clazz) {
@@ -45,7 +54,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
         @Override
         public ErrorModel getErrorModel(Throwable throwable) {
-            return ErrorModelFactory.createInternalServerError(throwable);
+            return errorModelFactory.createInternalServerError(throwable);
         }
 
         @Override

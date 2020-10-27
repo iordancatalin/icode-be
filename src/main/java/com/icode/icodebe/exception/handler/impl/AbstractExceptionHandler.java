@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.icode.icodebe.exception.handler.ExceptionHandler;
 import com.icode.icodebe.exception.handler.model.ErrorModel;
+import com.icode.icodebe.exception.handler.model.factory.ErrorModelFactory;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
@@ -11,7 +14,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+@Getter
 public abstract class AbstractExceptionHandler<T extends Throwable> implements ExceptionHandler {
+
+    @Autowired
+    private ErrorModelFactory errorModelFactory;
 
     @Override
     public abstract boolean supports(Class<? extends Throwable> clazz);

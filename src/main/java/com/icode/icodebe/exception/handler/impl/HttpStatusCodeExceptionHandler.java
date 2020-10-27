@@ -1,7 +1,6 @@
 package com.icode.icodebe.exception.handler.impl;
 
 import com.icode.icodebe.exception.handler.model.ErrorModel;
-import com.icode.icodebe.exception.handler.model.factory.ErrorModelFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -19,13 +18,13 @@ public class HttpStatusCodeExceptionHandler extends AbstractExceptionHandler<Htt
         final var statusCode = httpStatusCodeException.getStatusCode();
         switch (statusCode) {
             case NOT_FOUND:
-                return ErrorModelFactory.createNotFound(httpStatusCodeException);
+                return getErrorModelFactory().createNotFound(httpStatusCodeException);
             case UNAUTHORIZED:
-                return ErrorModelFactory.createUnauthorized(httpStatusCodeException);
+                return getErrorModelFactory().createUnauthorized(httpStatusCodeException);
             case FORBIDDEN:
-                return ErrorModelFactory.createForbidden(httpStatusCodeException);
+                return getErrorModelFactory().createForbidden(httpStatusCodeException);
             default:
-                return ErrorModelFactory.createInternalServerError(httpStatusCodeException);
+                return getErrorModelFactory().createInternalServerError(httpStatusCodeException);
         }
     }
 

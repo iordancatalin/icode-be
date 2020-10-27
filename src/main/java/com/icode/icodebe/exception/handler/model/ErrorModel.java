@@ -10,4 +10,5 @@ public class ErrorModel {
     ErrorCode errorCode;
     String errorMessage;
     String errorOccurrenceDate;
+    String stackTrace;
 }

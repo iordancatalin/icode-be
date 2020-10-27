@@ -12,6 +12,7 @@ import javax.validation.ValidationException;
 
 @Component
 public class BadRequestExceptionsHandler extends AbstractExceptionHandler<Throwable> {
+
     @Override
     public boolean supports(Class<? extends Throwable> clazz) {
         return MethodArgumentNotValidException.class.equals(clazz) ||
@@ -22,7 +23,7 @@ public class BadRequestExceptionsHandler extends AbstractExceptionHandler<Throwa
 
     @Override
     public ErrorModel getErrorModel(Throwable throwable) {
-        return ErrorModelFactory.createBadRequest(throwable);
+        return getErrorModelFactory().createBadRequest(throwable);
     }
 
     @Override
