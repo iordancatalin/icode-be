@@ -15,3 +15,8 @@ jwt:
     signing:
         key: bUfsYV8UrwDjVUjGmIuxd4vNT2AKlcph
     issuer: icode-app
+
+error:
+    trace:
+        enabled: true
+        disabledMessage: Trance is not enabled. Enable it to fill this property!
