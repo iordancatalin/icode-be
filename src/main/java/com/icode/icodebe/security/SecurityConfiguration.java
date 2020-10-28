@@ -1,11 +1,7 @@
 package com.icode.icodebe.security;
 
+import com.icode.icodebe.service.JwtService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -15,16 +11,36 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsUtils;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
 
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
+
+    private final ReactiveUserDetailsService reactiveUserDetailsService;
+    private final JwtService jwtService;
+
+    public SecurityConfiguration(ReactiveUserDetailsService reactiveUserDetailsService,
+                                 JwtService jwtService) {
+        this.reactiveUserDetailsService = reactiveUserDetailsService;
+        this.jwtService = jwtService;
+    }
+
+    @Bean
+    public ReactiveAuthenticationManager reactiveAuthenticationManager() {
+        final var authenticationManager = new UserDetailsRepositoryReactiveAuthenticationManager(reactiveUserDetailsService);
+        authenticationManager.setPasswordEncoder(passwordEncoder());
+
+        return authenticationManager;
+    }
+
+    @Bean
+    public TokenGeneratorFilter tokenGeneratorFilter() {
+        return new TokenGeneratorFilter(reactiveAuthenticationManager(), jwtService);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtService);
+    }
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
@@ -34,6 +50,9 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .cors(new CorsCustomizer())
+                .authenticationManager(reactiveAuthenticationManager())
+                .addFilterBefore(tokenGeneratorFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .authorizeExchange()
                 .pathMatchers(publicPaths)
                 .permitAll()
