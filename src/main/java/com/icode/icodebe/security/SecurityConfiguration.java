@@ -33,8 +33,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UsernamePasswordAuthenticationFilter reactiveUsernamePasswordAuthenticationFilter() {
-        return new UsernamePasswordAuthenticationFilter(reactiveAuthenticationManager(), jwtService);
+    public TokenGeneratorFilter tokenGeneratorFilter() {
+        return new TokenGeneratorFilter(reactiveAuthenticationManager(), jwtService);
     }
 
     @Bean
@@ -51,8 +51,8 @@ public class SecurityConfiguration {
                 .disable()
                 .cors(new CorsCustomizer())
                 .authenticationManager(reactiveAuthenticationManager())
-                .addFilterBefore(reactiveUsernamePasswordAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-                .addFilterBefore(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterBefore(tokenGeneratorFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .authorizeExchange()
                 .pathMatchers(publicPaths)
                 .permitAll()

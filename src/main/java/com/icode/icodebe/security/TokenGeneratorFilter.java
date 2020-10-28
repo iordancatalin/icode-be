@@ -20,7 +20,7 @@ import java.util.Objects;
 import static org.springframework.http.HttpHeaders.*;
 
 @Log4j2
-public class UsernamePasswordAuthenticationFilter implements WebFilter {
+public class TokenGeneratorFilter implements WebFilter {
 
     private static final String SIGN_IN_PATH = "/api/v1/sign-in";
     private static final String AUTH_TOKEN_TYPE = "Basic ";
@@ -29,8 +29,8 @@ public class UsernamePasswordAuthenticationFilter implements WebFilter {
     private final ReactiveAuthenticationManager reactiveAuthenticationManager;
     private final JwtService jwtService;
 
-    public UsernamePasswordAuthenticationFilter(ReactiveAuthenticationManager reactiveAuthenticationManager,
-                                                JwtService jwtService) {
+    public TokenGeneratorFilter(ReactiveAuthenticationManager reactiveAuthenticationManager,
+                                JwtService jwtService) {
         this.reactiveAuthenticationManager = reactiveAuthenticationManager;
         this.jwtService = jwtService;
     }
