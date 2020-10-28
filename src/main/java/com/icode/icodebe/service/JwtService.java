@@ -19,7 +19,7 @@ public class JwtService {
     @Value("${jwt.signing.key}")
     private String signingKey;
 
-    private String generateJwt(String subject) {
+    public String generateJwt(String subject) {
         final var expirationDate = calculateExpirationDate();
         final var signingKey = createSigningKey();
 

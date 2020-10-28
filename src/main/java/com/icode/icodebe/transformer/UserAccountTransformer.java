@@ -12,6 +12,7 @@ public class UserAccountTransformer {
                         .email(signUp.getEmail())
                         .username(signUp.getUsername())
                         .password(signUp.getPassword())
+                        .enabled(Boolean.FALSE)
                         .build());
     }
 }
