@@ -1,6 +1,5 @@
 package com.icode.icodebe.rest;
 
-import com.icode.icodebe.exception.NotificationServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

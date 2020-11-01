@@ -31,7 +31,16 @@ public class AuthenticationRouter {
     @Bean
     public RouterFunction<ServerResponse> authRouter() {
         return nest(path("/api/v1"),
-                route(POST("/sign-up"), this::handleSignUp));
+                route(POST("/sign-up"), this::handleSignUp)
+                        .andRoute(PUT("/confirm-email/{confirmationToken}"), this::handleConfirmEmail)
+        );
+    }
+
+    private Mono<ServerResponse> handleConfirmEmail(ServerRequest serverRequest) {
+        final var confirmationToken = serverRequest.pathVariable("confirmationToken");
+
+        return authenticationService.confirmEmail(confirmationToken)
+                .flatMap(unused -> ServerResponse.ok().build());
     }
 
     private Mono<ServerResponse> handleSignUp(ServerRequest serverRequest) {

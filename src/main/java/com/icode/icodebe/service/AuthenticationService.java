@@ -2,17 +2,21 @@ package com.icode.icodebe.service;
 
 import com.icode.icodebe.document.UserAccount;
 import com.icode.icodebe.exception.EmailOrUsernameAlreadyExistsException;
+import com.icode.icodebe.exception.InvalidConfirmationTokenException;
 import com.icode.icodebe.model.request.SignUp;
 import com.icode.icodebe.model.response.SignUpResponse;
 import com.icode.icodebe.repository.UserAccountRepository;
 import com.icode.icodebe.rest.NotificationServiceClient;
 import com.icode.icodebe.transformer.UserAccountTransformer;
+import com.mongodb.client.result.UpdateResult;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 public class AuthenticationService {
@@ -44,6 +48,15 @@ public class AuthenticationService {
                 .flatMap(userAccount -> sendConfirmationEmail(userAccount)
                         .map(unused -> userAccount))
                 .map(this::createResponse);
+    }
+
+    public Mono<UpdateResult> confirmEmail(String confirmationToken) {
+        final var confirmationTokenNotFound = Mono.<UpdateResult>error(new InvalidConfirmationTokenException(confirmationToken));
+
+        return userAccountRepository.findByConfirmationToken(confirmationToken)
+                .map(UserAccount::getId)
+                .flatMap(userAccountRepository::enableUserAccount)
+                .switchIfEmpty(confirmationTokenNotFound);
     }
 
     private Mono<ClientResponse> sendConfirmationEmail(UserAccount userAccount) {
