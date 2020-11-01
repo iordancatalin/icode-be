@@ -1,6 +1,7 @@
 package com.icode.icodebe.router;
 
 import com.icode.icodebe.model.request.SignUp;
+import com.icode.icodebe.model.response.SignUpResponse;
 import com.icode.icodebe.service.AuthenticationService;
 import com.icode.icodebe.validator.ConstraintsValidator;
 import org.springframework.context.annotation.Bean;
@@ -34,9 +35,11 @@ public class AuthenticationRouter {
     }
 
     private Mono<ServerResponse> handleSignUp(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(SignUp.class)
+        final var createAccount = serverRequest.bodyToMono(SignUp.class)
                 .doOnNext(validator::validate)
-                .flatMap(authenticationService::createAccount)
-                .flatMap(userAccount -> ServerResponse.status(HttpStatus.CREATED).build());
+                .flatMap(authenticationService::createAccount);
+
+        return ServerResponse.status(HttpStatus.CREATED)
+                .body(createAccount, SignUpResponse.class);
     }
 }
