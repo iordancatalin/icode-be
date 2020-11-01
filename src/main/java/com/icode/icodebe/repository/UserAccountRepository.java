@@ -36,6 +36,16 @@ public class UserAccountRepository {
         return reactiveMongoTemplate.findOne(query, UserAccount.class);
     }
 
+    public Mono<UpdateResult> resetConfirmationToken(ObjectId id, String newToken) {
+        final var criteria = Criteria.where("id").is(id);
+        final var query = new Query(criteria);
+
+        final var update = new Update();
+        update.set("confirmationToken", newToken);
+
+        return reactiveMongoTemplate.updateFirst(query, update, UserAccount.class);
+    }
+
     public Mono<UserAccount> findByEmailOrUsername(String search) {
         return findByEmailOrUsername(search, search);
     }
@@ -44,6 +54,13 @@ public class UserAccountRepository {
         final var criteria = new Criteria().orOperator(Criteria.where("email").is(email),
                 Criteria.where("username").is(username));
         final var query = Query.query(criteria);
+
+        return reactiveMongoTemplate.findOne(query, UserAccount.class);
+    }
+
+    public Mono<UserAccount> findById(ObjectId id) {
+        final var criteria = Criteria.where("id").is(id);
+        final var query = new Query(criteria);
 
         return reactiveMongoTemplate.findOne(query, UserAccount.class);
     }

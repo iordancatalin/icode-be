@@ -47,7 +47,8 @@ public class SecurityConfiguration {
         final var publicPaths = new String[]{"/api/v1/execute-code",
                 "/api/v1/execution-result/*",
                 "/api/v1/sign-up",
-                "/api/v1/confirm-email/*"};
+                "/api/v1/confirm-email/*",
+                "/api/v1/resend-confirmation-email/*"};
 
         return http
                 .csrf()

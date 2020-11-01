@@ -4,19 +4,19 @@ import com.icode.icodebe.document.UserAccount;
 import com.icode.icodebe.exception.EmailOrUsernameAlreadyExistsException;
 import com.icode.icodebe.exception.InvalidConfirmationTokenException;
 import com.icode.icodebe.model.request.SignUp;
+import com.icode.icodebe.model.response.ResetConfirmationTokenResponse;
 import com.icode.icodebe.model.response.SignUpResponse;
 import com.icode.icodebe.repository.UserAccountRepository;
 import com.icode.icodebe.rest.NotificationServiceClient;
 import com.icode.icodebe.transformer.UserAccountTransformer;
 import com.mongodb.client.result.UpdateResult;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Service
 public class AuthenticationService {
@@ -45,7 +45,7 @@ public class AuthenticationService {
         return userAccountRepository.findByEmailOrUsername(email, username)
                 .flatMap(userAccount -> Mono.error(new EmailOrUsernameAlreadyExistsException(email, username)))
                 .then(saveAccount)
-                .flatMap(userAccount -> sendConfirmationEmail(userAccount)
+                .flatMap(userAccount -> sendConfirmationEmail(userAccount.getEmail(), userAccount.getConfirmationToken())
                         .map(unused -> userAccount))
                 .map(this::createResponse);
     }
@@ -59,10 +59,22 @@ public class AuthenticationService {
                 .switchIfEmpty(confirmationTokenNotFound);
     }
 
-    private Mono<ClientResponse> sendConfirmationEmail(UserAccount userAccount) {
-        final var email = userAccount.getEmail();
-        final var confirmationToken = userAccount.getConfirmationToken();
+    public Mono<ResetConfirmationTokenResponse> resendConfirmationEmail(String userId) {
+        final var id = new ObjectId(userId);
 
+        return userAccountRepository.findById(id).flatMap(userAccount -> {
+            final var email = userAccount.getEmail();
+            final var newToken = createConfirmationToken();
+
+            final var resendConfirmationEmail = userAccountRepository.resetConfirmationToken(id, newToken)
+                    .flatMap(updateResult -> sendConfirmationEmail(email, newToken))
+                    .map(unused -> new ResetConfirmationTokenResponse(newToken));
+
+            return Boolean.TRUE.equals(userAccount.getEnabled()) ? Mono.empty() : resendConfirmationEmail;
+        });
+    }
+
+    private Mono<ClientResponse> sendConfirmationEmail(String email, String confirmationToken) {
         return notificationServiceClient.sendConfirmationEmail(email, confirmationToken);
     }
 
@@ -71,9 +83,11 @@ public class AuthenticationService {
     }
 
     private UserAccount createUserWithConfirmationToken(UserAccount userAccount) {
-        final var confirmationToken = UUID.randomUUID().toString();
+        return userAccount.withConfirmationToken(createConfirmationToken());
+    }
 
-        return userAccount.withConfirmationToken(confirmationToken);
+    private String createConfirmationToken() {
+        return UUID.randomUUID().toString();
     }
 
     private SignUpResponse createResponse(UserAccount userAccount) {

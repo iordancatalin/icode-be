@@ -1,6 +1,7 @@
 package com.icode.icodebe.router;
 
 import com.icode.icodebe.model.request.SignUp;
+import com.icode.icodebe.model.response.ResetConfirmationTokenResponse;
 import com.icode.icodebe.model.response.SignUpResponse;
 import com.icode.icodebe.service.AuthenticationService;
 import com.icode.icodebe.validator.ConstraintsValidator;
@@ -33,7 +34,15 @@ public class AuthenticationRouter {
         return nest(path("/api/v1"),
                 route(POST("/sign-up"), this::handleSignUp)
                         .andRoute(PUT("/confirm-email/{confirmationToken}"), this::handleConfirmEmail)
+                        .andRoute(PUT("/resend-confirmation-email/{userId}"), this::handleResendConfirmationEmail)
         );
+    }
+
+    private Mono<ServerResponse> handleResendConfirmationEmail(ServerRequest serverRequest) {
+        final var userId = serverRequest.pathVariable("userId");
+        final var resentConfirmationEmail = authenticationService.resendConfirmationEmail(userId);
+
+        return ServerResponse.ok().body(resentConfirmationEmail, ResetConfirmationTokenResponse.class);
     }
 
     private Mono<ServerResponse> handleConfirmEmail(ServerRequest serverRequest) {
