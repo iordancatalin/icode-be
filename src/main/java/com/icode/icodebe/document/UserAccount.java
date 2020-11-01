@@ -25,4 +25,7 @@ public class UserAccount {
     @With
     private String password;
     private Boolean enabled;
+
+    @With
+    private String confirmationToken;
 }
