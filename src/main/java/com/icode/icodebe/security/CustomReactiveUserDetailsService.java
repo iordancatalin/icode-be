@@ -20,7 +20,7 @@ public class CustomReactiveUserDetailsService implements ReactiveUserDetailsServ
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        return userAccountRepository.findByUsername(username)
+        return userAccountRepository.findByEmailOrUsername(username)
                 .map(this::createUserDetails)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException(username)));
     }

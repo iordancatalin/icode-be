@@ -1,6 +1,7 @@
 package com.icode.icodebe.exception.handler.impl;
 
 import com.icode.icodebe.exception.EmailOrUsernameAlreadyExistsException;
+import com.icode.icodebe.exception.InvalidConfirmationTokenException;
 import com.icode.icodebe.exception.handler.model.ErrorModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,8 @@ public class BadRequestExceptionsHandler extends AbstractExceptionHandler<Throwa
         return MethodArgumentNotValidException.class.equals(clazz) ||
                 ServerWebInputException.class.equals(clazz) ||
                 ValidationException.class.equals(clazz) ||
-                EmailOrUsernameAlreadyExistsException.class.equals(clazz);
+                EmailOrUsernameAlreadyExistsException.class.equals(clazz) ||
+                InvalidConfirmationTokenException.class.equals(clazz);
     }
 
     @Override
