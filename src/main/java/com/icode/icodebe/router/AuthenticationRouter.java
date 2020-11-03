@@ -1,5 +1,7 @@
 package com.icode.icodebe.router;
 
+import com.icode.icodebe.model.request.RequestResetPassword;
+import com.icode.icodebe.model.request.ResetPassword;
 import com.icode.icodebe.model.request.SignUp;
 import com.icode.icodebe.model.response.ResetConfirmationTokenResponse;
 import com.icode.icodebe.model.response.SignUpResponse;
@@ -35,6 +37,8 @@ public class AuthenticationRouter {
                 route(POST("/sign-up"), this::handleSignUp)
                         .andRoute(PUT("/confirm-email/{confirmationToken}"), this::handleConfirmEmail)
                         .andRoute(PUT("/resend-confirmation-email/{userId}"), this::handleResendConfirmationEmail)
+                        .andRoute(PUT("/reset-password/{resetToken}"), this::handleResetPassword)
+                        .andRoute(POST("/request-reset-password"), this::handleRequestResetPassword)
         );
     }
 
@@ -59,5 +63,21 @@ public class AuthenticationRouter {
 
         return ServerResponse.status(HttpStatus.CREATED)
                 .body(createAccount, SignUpResponse.class);
+    }
+
+    private Mono<ServerResponse> handleRequestResetPassword(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(RequestResetPassword.class)
+                .map(RequestResetPassword::getInput)
+                .flatMap(authenticationService::requestResetPassword)
+                .flatMap(unused -> ServerResponse.ok().build());
+    }
+
+    private Mono<ServerResponse> handleResetPassword(ServerRequest serverRequest) {
+        final var resetToken = serverRequest.pathVariable("resetToken");
+
+        return serverRequest.bodyToMono(ResetPassword.class)
+                .map(ResetPassword::getNewPassword)
+                .flatMap(newPassword -> authenticationService.resetPassword(resetToken, newPassword))
+                .flatMap(unused -> ServerResponse.ok().build());
     }
 }

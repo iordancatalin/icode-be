@@ -48,7 +48,9 @@ public class SecurityConfiguration {
                 "/api/v1/execution-result/*",
                 "/api/v1/sign-up",
                 "/api/v1/confirm-email/*",
-                "/api/v1/resend-confirmation-email/*"};
+                "/api/v1/resend-confirmation-email/*",
+                "/api/v1/request-reset-password",
+                "/api/v1/reset-password/*"};
 
         return http
                 .csrf()

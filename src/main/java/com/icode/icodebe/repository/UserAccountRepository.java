@@ -68,4 +68,14 @@ public class UserAccountRepository {
     public Mono<UserAccount> save(UserAccount userAccount) {
         return reactiveMongoTemplate.save(userAccount);
     }
+
+    public Mono<UpdateResult> updateUserPassword(ObjectId userId, String newPassword) {
+        final var criteria = Criteria.where("id").is(userId);
+        final var query = new Query(criteria);
+
+        final var update = new Update();
+        update.set("password", newPassword);
+
+        return reactiveMongoTemplate.updateFirst(query, update, UserAccount.class);
+    }
 }
