@@ -7,8 +7,7 @@ import lombok.Data;
 @Builder
 public class SignUpResponse {
 
+    private String userId;
     private String username;
     private String email;
-    private Boolean enabled;
-    private String confirmationToken;
 }
