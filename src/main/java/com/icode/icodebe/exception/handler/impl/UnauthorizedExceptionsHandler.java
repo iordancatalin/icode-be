@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,7 +15,8 @@ public class UnauthorizedExceptionsHandler extends AbstractExceptionHandler<Thro
     public boolean supports(Class<? extends Throwable> clazz) {
         return AuthenticationException.class.equals(clazz) ||
                 BadCredentialsException.class.equals(clazz) ||
-                DisabledException.class.equals(clazz);
+                DisabledException.class.equals(clazz) ||
+                UsernameNotFoundException.class.equals(clazz);
     }
 
     @Override
