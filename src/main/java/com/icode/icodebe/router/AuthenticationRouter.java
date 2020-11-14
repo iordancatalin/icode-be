@@ -36,15 +36,15 @@ public class AuthenticationRouter {
         return nest(path("/api/v1"),
                 route(POST("/sign-up"), this::handleSignUp)
                         .andRoute(PUT("/confirm-email/{confirmationToken}"), this::handleConfirmEmail)
-                        .andRoute(PUT("/resend-confirmation-email/{userId}"), this::handleResendConfirmationEmail)
+                        .andRoute(PUT("/resend-confirmation-email/{input:.+}"), this::handleResendConfirmationEmail)
                         .andRoute(PUT("/reset-password/{resetToken}"), this::handleResetPassword)
                         .andRoute(POST("/request-reset-password"), this::handleRequestResetPassword)
         );
     }
 
     private Mono<ServerResponse> handleResendConfirmationEmail(ServerRequest serverRequest) {
-        final var userId = serverRequest.pathVariable("userId");
-        final var resentConfirmationEmail = authenticationService.resendConfirmationEmail(userId);
+        final var input = serverRequest.pathVariable("input");
+        final var resentConfirmationEmail = authenticationService.resendConfirmationEmail(input);
 
         return ServerResponse.ok().body(resentConfirmationEmail, ResetConfirmationTokenResponse.class);
     }

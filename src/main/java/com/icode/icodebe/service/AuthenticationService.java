@@ -21,11 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 
 @Service
@@ -60,7 +58,7 @@ public class AuthenticationService {
                 .then(saveAccount)
                 .flatMap(userAccount -> sendConfirmationEmail(userAccount.getEmail(), userAccount.getConfirmationToken())
                         .map(unused -> userAccount))
-                .map(this::createResponse);
+                .map(userAccount -> new UserAccountTransformer().toSignUpResponse(userAccount));
     }
 
     public Mono<UpdateResult> confirmEmail(String confirmationToken) {
@@ -72,12 +70,11 @@ public class AuthenticationService {
                 .switchIfEmpty(confirmationTokenNotFound);
     }
 
-    public Mono<ResetConfirmationTokenResponse> resendConfirmationEmail(String userId) {
-        final var id = new ObjectId(userId);
-
-        return userAccountRepository.findById(id).flatMap(userAccount -> {
+    public Mono<ResetConfirmationTokenResponse> resendConfirmationEmail(String input) {
+        return userAccountRepository.findByEmailOrUsername(input).flatMap(userAccount -> {
             final var email = userAccount.getEmail();
             final var newToken = generateToken();
+            final var id = userAccount.getId();
 
             final var resendConfirmationEmail = userAccountRepository.resetConfirmationToken(id, newToken)
                     .map(unused -> new EmailConfirmationModel(email, newToken))
@@ -150,14 +147,5 @@ public class AuthenticationService {
 
     private String generateToken() {
         return UUID.randomUUID().toString();
-    }
-
-    private SignUpResponse createResponse(UserAccount userAccount) {
-        return SignUpResponse.builder()
-                .email(userAccount.getEmail())
-                .username(userAccount.getUsername())
-                .confirmationToken(userAccount.getConfirmationToken())
-                .enabled(userAccount.getEnabled())
-                .build();
     }
 }
