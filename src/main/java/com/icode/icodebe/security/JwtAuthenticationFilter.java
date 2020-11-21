@@ -1,5 +1,8 @@
 package com.icode.icodebe.security;
 
+import com.icode.icodebe.common.Constants;
+import com.icode.icodebe.document.JwtBlackList;
+import com.icode.icodebe.repository.JwtBlackListRepository;
 import com.icode.icodebe.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -7,6 +10,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -23,12 +27,13 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Log4j2
 public class JwtAuthenticationFilter implements WebFilter {
 
-    private static final String AUTH_TOKEN_TYPE = "Bearer ";
-
     private final JwtService jwtService;
+    private final JwtBlackListRepository jwtBlackListRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   JwtBlackListRepository jwtBlackListRepository) {
         this.jwtService = jwtService;
+        this.jwtBlackListRepository = jwtBlackListRepository;
     }
 
     @Override
@@ -42,12 +47,22 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
         final var token = validateAndGetAuthorizationHeader(request.getHeaders());
-        final var username = getUsername(token);
 
-        final var authentication = new UsernamePasswordAuthenticationToken(username, null, List.of());
+        final var authenticate = Mono.just(token)
+                .map(this::getUsername)
+                .map(username -> new UsernamePasswordAuthenticationToken(username, null, List.of()))
+                .flatMap(authentication -> webFilterChain.filter(serverWebExchange)
+                        .subscriberContext(ReactiveSecurityContextHolder.withAuthentication(authentication)));
 
-        return webFilterChain.filter(serverWebExchange)
-                .subscriberContext(ReactiveSecurityContextHolder.withAuthentication(authentication));
+        final var unauthorized = Mono.just(serverWebExchange)
+                .map(ServerWebExchange::getResponse)
+                .doOnNext(response -> response.setStatusCode(HttpStatus.UNAUTHORIZED))
+                .then();
+
+        return jwtBlackListRepository.findByJwt(token)
+                .defaultIfEmpty(new JwtBlackList(null))
+                .flatMap(jwtBlackList -> Objects.nonNull(jwtBlackList.getJwt()) ? unauthorized
+                        : authenticate);
     }
 
     private String getUsername(String token) {
@@ -65,6 +80,6 @@ public class JwtAuthenticationFilter implements WebFilter {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        return authorizationHeader.replace(AUTH_TOKEN_TYPE, "");
+        return authorizationHeader.replace(Constants.AUTH_TOKEN_TYPE, "");
     }
 }

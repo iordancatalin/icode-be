@@ -1,6 +1,8 @@
 package com.icode.icodebe.common;
 
 public class Constants {
+    public static final String AUTH_TOKEN_TYPE = "Bearer ";
+
     public static final String STORAGE_ROOT_DIRECTORY = System.getProperty("user.home") + "\\icode";
 
     public static final String FILE_TEMPLATE = "<html lang=\"en\">\n" +

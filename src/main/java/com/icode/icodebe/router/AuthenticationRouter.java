@@ -1,5 +1,6 @@
 package com.icode.icodebe.router;
 
+import com.icode.icodebe.common.Constants;
 import com.icode.icodebe.model.request.RequestResetPassword;
 import com.icode.icodebe.model.request.ResetPassword;
 import com.icode.icodebe.model.request.SignUp;
@@ -9,11 +10,14 @@ import com.icode.icodebe.service.AuthenticationService;
 import com.icode.icodebe.validator.ConstraintsValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
@@ -39,6 +43,7 @@ public class AuthenticationRouter {
                         .andRoute(PUT("/resend-confirmation-email/{input:.+}"), this::handleResendConfirmationEmail)
                         .andRoute(PUT("/reset-password/{resetToken}"), this::handleResetPassword)
                         .andRoute(POST("/request-reset-password"), this::handleRequestResetPassword)
+                        .andRoute(POST("/sign-out"), this::handleSingOut)
         );
     }
 
@@ -80,6 +85,16 @@ public class AuthenticationRouter {
                 .doOnNext(validator::validate)
                 .map(ResetPassword::getNewPassword)
                 .flatMap(newPassword -> authenticationService.resetPassword(resetToken, newPassword))
+                .flatMap(unused -> ServerResponse.ok().build());
+    }
+
+    private Mono<ServerResponse> handleSingOut(ServerRequest serverRequest) {
+        final var authorizationHeader = serverRequest.headers().firstHeader(HttpHeaders.AUTHORIZATION);
+        Objects.requireNonNull(authorizationHeader);
+
+        final var jwt = authorizationHeader.replace(Constants.AUTH_TOKEN_TYPE, "");
+
+        return authenticationService.signOut(jwt)
                 .flatMap(unused -> ServerResponse.ok().build());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Document
 @Getter
+@Setter
 public class UserAccount {
 
     @Id
@@ -28,4 +29,6 @@ public class UserAccount {
 
     @With
     private String confirmationToken;
+
+    private String imageURL;
 }

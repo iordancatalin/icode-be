@@ -1,5 +1,6 @@
 package com.icode.icodebe.security;
 
+import com.icode.icodebe.repository.JwtBlackListRepository;
 import com.icode.icodebe.service.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -17,11 +18,14 @@ public class SecurityConfiguration {
 
     private final ReactiveUserDetailsService reactiveUserDetailsService;
     private final JwtService jwtService;
+    private final JwtBlackListRepository jwtBlackListRepository;
 
     public SecurityConfiguration(ReactiveUserDetailsService reactiveUserDetailsService,
-                                 JwtService jwtService) {
+                                 JwtService jwtService,
+                                 JwtBlackListRepository jwtBlackListRepository) {
         this.reactiveUserDetailsService = reactiveUserDetailsService;
         this.jwtService = jwtService;
+        this.jwtBlackListRepository = jwtBlackListRepository;
     }
 
     @Bean
@@ -39,7 +43,7 @@ public class SecurityConfiguration {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtService);
+        return new JwtAuthenticationFilter(jwtService, jwtBlackListRepository);
     }
 
     @Bean
