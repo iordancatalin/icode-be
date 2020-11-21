@@ -46,8 +46,8 @@ public class UserAccountRepository {
         return reactiveMongoTemplate.updateFirst(query, update, UserAccount.class);
     }
 
-    public Mono<UserAccount> findByEmailOrUsername(String search) {
-        return findByEmailOrUsername(search, search);
+    public Mono<UserAccount> findByEmailOrUsername(String usernameOrEmail) {
+        return findByEmailOrUsername(usernameOrEmail, usernameOrEmail);
     }
 
     public Mono<UserAccount> findByEmailOrUsername(String email, String username) {

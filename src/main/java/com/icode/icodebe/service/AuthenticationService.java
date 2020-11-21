@@ -1,5 +1,6 @@
 package com.icode.icodebe.service;
 
+import com.icode.icodebe.document.JwtBlackList;
 import com.icode.icodebe.document.ResetPasswordToken;
 import com.icode.icodebe.document.UserAccount;
 import com.icode.icodebe.exception.EmailOrUsernameAlreadyExistsException;
@@ -8,6 +9,7 @@ import com.icode.icodebe.exception.ResetPasswordTokenExpiredOrInvalidException;
 import com.icode.icodebe.model.request.SignUp;
 import com.icode.icodebe.model.response.ResetConfirmationTokenResponse;
 import com.icode.icodebe.model.response.SignUpResponse;
+import com.icode.icodebe.repository.JwtBlackListRepository;
 import com.icode.icodebe.repository.ResetPasswordTokenRepository;
 import com.icode.icodebe.repository.UserAccountRepository;
 import com.icode.icodebe.rest.NotificationServiceClient;
@@ -33,15 +35,18 @@ public class AuthenticationService {
     private final UserAccountRepository userAccountRepository;
     private final NotificationServiceClient notificationServiceClient;
     private final ResetPasswordTokenRepository resetPasswordTokenRepository;
+    private final JwtBlackListRepository jwtBlackListRepository;
 
     public AuthenticationService(PasswordEncoder passwordEncoder,
                                  UserAccountRepository userAccountRepository,
                                  NotificationServiceClient notificationServiceClient,
-                                 ResetPasswordTokenRepository resetPasswordTokenRepository) {
+                                 ResetPasswordTokenRepository resetPasswordTokenRepository,
+                                 JwtBlackListRepository jwtBlackListRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userAccountRepository = userAccountRepository;
         this.notificationServiceClient = notificationServiceClient;
         this.resetPasswordTokenRepository = resetPasswordTokenRepository;
+        this.jwtBlackListRepository = jwtBlackListRepository;
     }
 
     public Mono<SignUpResponse> createAccount(SignUp signUp) {
@@ -111,6 +116,10 @@ public class AuthenticationService {
                         resetPassword(resetPasswordToken.getUserId(), newPassword))
                 .flatMap(unused -> resetPasswordTokenRepository.invalidateToken(resetToken))
                 .switchIfEmpty(Mono.error(new ResetPasswordTokenExpiredOrInvalidException(resetToken)));
+    }
+
+    public Mono<JwtBlackList> signOut(String jwt) {
+        return jwtBlackListRepository.save(new JwtBlackList(jwt));
     }
 
     private Mono<UpdateResult> resetPassword(ObjectId userId, String newPassword) {
