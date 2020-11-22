@@ -61,8 +61,7 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         return jwtBlackListRepository.findByJwt(token)
                 .defaultIfEmpty(new JwtBlackList(null))
-                .flatMap(jwtBlackList -> Objects.nonNull(jwtBlackList.getJwt()) ? unauthorized
-                        : authenticate);
+                .flatMap(jwtBlackList -> Objects.nonNull(jwtBlackList.getJwt()) ? unauthorized : authenticate);
     }
 
     private String getUsername(String token) {

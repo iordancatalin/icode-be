@@ -40,7 +40,7 @@ public class TokenGeneratorFilter implements WebFilter {
         final var requestHeaders = serverWebExchange.getRequest().getHeaders();
 
         if (isNotRequestForAuthentication(serverWebExchange)) {
-            log.info("Request is not for authentication");
+//            log.info("Request is not for authentication");
             return webFilterChain.filter(serverWebExchange);
         }
 
