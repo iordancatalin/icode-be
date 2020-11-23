@@ -75,7 +75,7 @@ public class AuthenticationRouter {
                 .doOnNext(validator::validate)
                 .map(RequestResetPassword::getInput)
                 .flatMap(authenticationService::requestResetPassword)
-                .flatMap(unused -> ServerResponse.ok().build());
+                .then(ServerResponse.ok().build());
     }
 
     private Mono<ServerResponse> handleResetPassword(ServerRequest serverRequest) {
@@ -85,7 +85,7 @@ public class AuthenticationRouter {
                 .doOnNext(validator::validate)
                 .map(ResetPassword::getNewPassword)
                 .flatMap(newPassword -> authenticationService.resetPassword(resetToken, newPassword))
-                .flatMap(unused -> ServerResponse.ok().build());
+                .then(ServerResponse.ok().build());
     }
 
     private Mono<ServerResponse> handleSingOut(ServerRequest serverRequest) {

@@ -18,6 +18,9 @@ import com.icode.icodebe.rest.model.ResetPasswordModel;
 import com.icode.icodebe.transformer.UserAccountTransformer;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -120,6 +123,13 @@ public class AuthenticationService {
 
     public Mono<JwtBlackList> signOut(String jwt) {
         return jwtBlackListRepository.save(new JwtBlackList(jwt));
+    }
+
+    public Mono<UserAccount> getAuthenticatedUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getName)
+                .flatMap(userAccountRepository::findByEmailOrUsername);
     }
 
     private Mono<UpdateResult> resetPassword(ObjectId userId, String newPassword) {
