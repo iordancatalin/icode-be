@@ -12,4 +12,8 @@ public class SaveOrUpdateProjectRequest {
 
     @NotBlank
     private final String projectName;
+
+    private final String html;
+    private final String css;
+    private final String js;
 }

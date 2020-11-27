@@ -22,4 +22,7 @@ public class Project {
     private ObjectId ownerId;
     private LocalDateTime lastUpdated;
     private String directoryId;
+    private String html;
+    private String css;
+    private String js;
 }
