@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 public class ProjectResponse {
 
     private final String name;
-    private final String ownerName;
-    private final String ownerEmail;
     private final LocalDateTime lastUpdate;
     private final String projectRef;
+    private final String html;
+    private final String css;
+    private final String js;
 }
