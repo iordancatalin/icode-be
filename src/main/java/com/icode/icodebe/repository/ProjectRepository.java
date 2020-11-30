@@ -2,6 +2,7 @@ package com.icode.icodebe.repository;
 
 import com.icode.icodebe.document.Project;
 import com.icode.icodebe.model.request.SaveOrUpdateProjectRequest;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
@@ -51,5 +52,11 @@ public class ProjectRepository {
         final var query = new Query(Criteria.where("ownerId").is(ownerId));
 
         return reactiveMongoTemplate.find(query, Project.class);
+    }
+
+    public Mono<DeleteResult> deleteByProjectRef(String projectRef) {
+        final var query = new Query(Criteria.where("directoryId").is(projectRef));
+
+        return reactiveMongoTemplate.remove(query, Project.class);
     }
 }

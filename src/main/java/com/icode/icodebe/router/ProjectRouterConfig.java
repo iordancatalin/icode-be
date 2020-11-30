@@ -33,6 +33,7 @@ public class ProjectRouterConfig {
                 route(POST("/project/save-or-update"), this::saveOrUpdateProject)
                         .andRoute(GET("/projects"), this::findUserProjects)
                         .andRoute(GET("/project/{projectRef}"), this::findByProjectRef)
+                        .andRoute(DELETE("/project/{projectRef}"), this::deleteProject)
         );
     }
 
@@ -54,5 +55,12 @@ public class ProjectRouterConfig {
         final var projectPublisher = projectService.findByProjectRef(projectRef);
 
         return ServerResponse.ok().body(projectPublisher, ProjectResponse.class);
+    }
+
+    private Mono<ServerResponse> deleteProject(ServerRequest serverRequest) {
+        final var projectRef = serverRequest.pathVariable("projectRef");
+
+        return projectService.deleteByProjectRef(projectRef)
+                .flatMap(unused -> ServerResponse.ok().build());
     }
 }
