@@ -46,6 +46,10 @@ public class ProjectService {
                 .map(this::convertToProjectResponse);
     }
 
+    public Mono<Void> deleteByProjectRef(String projectRef) {
+        return projectRepository.deleteByProjectRef(projectRef).then();
+    }
+
     private Mono<Project> saveProject(SaveOrUpdateProjectRequest saveOrUpdateProjectRequest) {
         return authenticationService.getAuthenticatedUser()
                 .map(UserAccount::getId)
