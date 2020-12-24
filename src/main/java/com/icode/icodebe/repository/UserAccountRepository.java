@@ -78,4 +78,10 @@ public class UserAccountRepository {
 
         return reactiveMongoTemplate.updateFirst(query, update, UserAccount.class);
     }
+
+    public Mono<UserAccount> findByUsername(String username) {
+        final var query = Query.query(Criteria.where("username").is(username));
+
+        return reactiveMongoTemplate.findOne(query, UserAccount.class);
+    }
 }

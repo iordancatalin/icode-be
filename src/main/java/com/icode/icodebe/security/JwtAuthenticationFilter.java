@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         final var request = serverWebExchange.getRequest();
 
         if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-            log.warn("Request doesn't contains Authorization header");
+//            log.warn("Request doesn't contains Authorization header");
             return webFilterChain.filter(serverWebExchange);
         }
 

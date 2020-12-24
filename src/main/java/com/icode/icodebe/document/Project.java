@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,4 +26,5 @@ public class Project {
     private String html;
     private String css;
     private String js;
+    private List<ObjectId> sharedWith;
 }

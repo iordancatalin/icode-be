@@ -1,9 +1,11 @@
 package com.icode.icodebe.router;
 
 import com.icode.icodebe.model.request.SaveOrUpdateProjectRequest;
+import com.icode.icodebe.model.request.ShareProject;
 import com.icode.icodebe.model.response.ProjectResponse;
 import com.icode.icodebe.service.ProjectService;
 import com.icode.icodebe.validator.ConstraintsValidator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -16,16 +18,11 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.n
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
+@RequiredArgsConstructor
 public class ProjectRouterConfig {
 
     private final ProjectService projectService;
     private final ConstraintsValidator validator;
-
-    public ProjectRouterConfig(ProjectService projectService,
-                               ConstraintsValidator validator) {
-        this.projectService = projectService;
-        this.validator = validator;
-    }
 
     @Bean
     public RouterFunction<ServerResponse> projectRouter() {
@@ -34,6 +31,8 @@ public class ProjectRouterConfig {
                         .andRoute(GET("/projects"), this::findUserProjects)
                         .andRoute(GET("/project/{projectRef}"), this::findByProjectRef)
                         .andRoute(DELETE("/project/{projectRef}"), this::deleteProject)
+                        .andRoute(PUT("/project/share"), this::shareProject)
+                        .andRoute(GET("/projects/shared-with-me"), this::findSharedProjects)
         );
     }
 
@@ -62,5 +61,17 @@ public class ProjectRouterConfig {
 
         return projectService.deleteByProjectRef(projectRef)
                 .flatMap(unused -> ServerResponse.ok().build());
+    }
+
+    private Mono<ServerResponse> shareProject(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(ShareProject.class)
+                .doOnNext(validator::validate)
+                .flatMap(projectService::shareProjectWithUser)
+                .then(ServerResponse.ok().build());
+    }
+
+    private Mono<ServerResponse> findSharedProjects(ServerRequest serverRequest) {
+        final var projects = projectService.findSharedProjects();
+        return ServerResponse.ok().body(projects, ProjectResponse.class);
     }
 }

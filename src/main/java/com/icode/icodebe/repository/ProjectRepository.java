@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Repository
 public class ProjectRepository {
@@ -59,4 +60,21 @@ public class ProjectRepository {
 
         return reactiveMongoTemplate.remove(query, Project.class);
     }
+
+    public Mono<UpdateResult> shareProject(String projectRef, ObjectId userId) {
+        final var query = new Query(Criteria.where("directoryId").is(projectRef));
+        final var update = new Update();
+
+        update.addToSet("sharedWith", userId);
+
+        return reactiveMongoTemplate.updateFirst(query, update, Project.class);
+    }
+
+    public Flux<Project> findSharedProjects(ObjectId id) {
+        final var query = new Query();
+
+        return reactiveMongoTemplate.find(query, Project.class)
+                .filter(project -> Objects.nonNull(project.getSharedWith()) && project.getSharedWith().contains(id));
+    }
+
 }

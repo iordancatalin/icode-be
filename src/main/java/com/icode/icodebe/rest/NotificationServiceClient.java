@@ -1,6 +1,7 @@
 package com.icode.icodebe.rest;
 
 import com.icode.icodebe.rest.model.EmailConfirmationModel;
+import com.icode.icodebe.rest.model.NotificationRequest;
 import com.icode.icodebe.rest.model.ResetPasswordModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -37,4 +38,15 @@ public class NotificationServiceClient {
                 .body(Mono.just(resetPasswordModel), ResetPasswordModel.class)
                 .exchange();
     }
+
+    public Mono<ClientResponse> createAppNotification(NotificationRequest notificationRequest) {
+        final var url = baseURL + "/api/v1/notification";
+
+        return WebClient.create(url)
+                .post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(notificationRequest), NotificationRequest.class)
+                .exchange();
+    }
+
 }

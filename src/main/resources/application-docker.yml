@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      host: icode-db
+      port: 27017
+      username: icode-service
+      password: icode-service-dev
+      database: data
+      authentication-database: admin
+
+notification-service:
+  baseURL: http://notification:8081

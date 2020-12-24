@@ -14,6 +14,7 @@ import java.nio.channels.CompletionHandler;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -61,13 +62,16 @@ public class FileService {
     private CompletableFuture<Path> writeContentToPath(Path path, String content) {
         final var completableFuture = new CompletableFuture<Path>();
 
-        try (final var channel = AsynchronousFileChannel.open(path, WRITE, TRUNCATE_EXISTING, CREATE)) {
+        AsynchronousFileChannel channel = null;
+
+        try {
+            channel = AsynchronousFileChannel.open(path, WRITE, TRUNCATE_EXISTING, CREATE);
             final var contentBytes = content.getBytes();
             final var byteBuffer = ByteBuffer.allocate(contentBytes.length);
             byteBuffer.put(contentBytes);
             byteBuffer.flip();
 
-            final var completionHandler = new FileWriteCompletionHandler(path);
+            final var completionHandler = new FileWriteCompletionHandler(path, channel);
             channel.write(byteBuffer, 0, completableFuture, completionHandler);
 
         } catch (IOException e) {
@@ -96,15 +100,26 @@ public class FileService {
     private static class FileWriteCompletionHandler implements CompletionHandler<Integer, CompletableFuture<Path>> {
 
         private final Path path;
+        private final AsynchronousFileChannel channel;
 
         @Override
         public void completed(Integer result, CompletableFuture<Path> completableFuture) {
             completableFuture.complete(path);
+            closeChannel();
         }
 
         @Override
         public void failed(Throwable exc, CompletableFuture<Path> completableFuture) {
             completableFuture.completeExceptionally(exc);
+            closeChannel();
+        }
+
+        private void closeChannel() {
+            try {
+                channel.close();
+            } catch (IOException e) {
+                log.error(e);
+            }
         }
     }
 }
